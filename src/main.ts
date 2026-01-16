@@ -115,8 +115,8 @@ class ThunderFighterGame {
     
     console.log('Thunder Fighter - Initializing...');
     
-    // Initialize sprite manager
-    this.spriteManager.initialize();
+    // Initialize sprite manager (async to load SVG sprites)
+    await this.spriteManager.initialize();
     
     // Initialize audio (will be fully activated on first user interaction)
     await this.audioManager.initialize();

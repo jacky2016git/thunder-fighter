@@ -296,7 +296,8 @@ export class PlayerAircraft implements Collidable, Movable {
   }
 
   /**
-   * Render the player aircraft
+   * Render the player aircraft using SVG sprite
+   * 使用SVG精灵渲染玩家飞机
    * @param context The 2D rendering context
    */
   render(context: CanvasRenderingContext2D): void {
@@ -309,29 +310,69 @@ export class PlayerAircraft implements Collidable, Movable {
 
     context.save();
 
-    // Draw player aircraft as a triangle (placeholder)
-    context.fillStyle = '#00BFFF'; // Deep sky blue
+    // Draw player aircraft using SVG
+    const svgData = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="200" height="200"><path d="M241.493333 136.533333l246.272 283.221334-233.941333-18.901334L179.925333 136.533333H241.493333zM241.493333 887.637333l246.272-283.221333-233.941333 18.901333-73.898667 264.32H241.493333zM526.890667 425.898667l71.68 6.144-65.152-61.568h-45.653334l39.125334 55.424zM526.890667 598.272l71.68-6.186667-65.152 61.568h-45.653334l39.125334-55.381333zM296.96 561.322667l-18.517333-24.618667h-172.373334l-24.618666 18.474667v43.093333l215.466666-36.949333zM296.96 462.805333l-24.661333 24.661334-166.229334 6.144-24.618666-21.888v-39.68l215.466666 30.762666z" fill="#1F5596"/><path d="M721.749333 468.992c9.813333 0 233.941333 18.474667 233.941334 43.093333s-209.322667 43.093333-233.941334 43.093334l-73.898666 24.618666-541.781334 30.762667 227.84-36.906667-43.093333-49.28-178.56-6.144v-12.330666l178.517333-6.144 43.093334-49.237334-227.797334-36.949333 541.781334 30.805333 73.898666 24.618667z m0 24.618667l36.906667 6.144 36.949333 12.330666-36.949333 12.288-36.949333 6.186667v-36.949333z m-24.661333 36.949333v-36.949333h-91.946667c-19.626667 4.522667-19.626667 32.426667 0 36.949333h91.946667z" fill="#1F5596"/><path d="M69.12 388.949333l135.466667 6.144-104.661334-110.805333-43.093333 24.618667 12.330667 80.042666zM69.12 635.221333l135.466667-6.186666-104.661334 110.848-43.093333-24.661334 12.330667-80z" fill="#1F5596"/></svg>`;
+    
+    // Try to use cached image if available and URL API exists (browser environment)
+    if (typeof URL !== 'undefined' && typeof URL.createObjectURL === 'function') {
+      if (!PlayerAircraft.cachedSpriteImage) {
+        PlayerAircraft.cachedSpriteImage = new Image();
+        const blob = new Blob([svgData], { type: 'image/svg+xml' });
+        const url = URL.createObjectURL(blob);
+        PlayerAircraft.cachedSpriteImage.src = url;
+        PlayerAircraft.cachedSpriteImage.onload = () => {
+          URL.revokeObjectURL(url);
+        };
+      }
+      
+      if (PlayerAircraft.cachedSpriteImage.complete && PlayerAircraft.cachedSpriteImage.naturalWidth > 0) {
+        // Draw the SVG image rotated -90 degrees to face up
+        context.translate(this.x + this.width / 2, this.y + this.height / 2);
+        context.rotate(-Math.PI / 2);
+        context.drawImage(
+          PlayerAircraft.cachedSpriteImage,
+          -this.height / 2,
+          -this.width / 2,
+          this.height,
+          this.width
+        );
+        context.restore();
+        return;
+      }
+    }
+    
+    // Fallback: draw a stylized fighter shape
+    context.fillStyle = '#1F5596';
     context.beginPath();
-    context.moveTo(this.x + this.width / 2, this.y); // Top center
-    context.lineTo(this.x, this.y + this.height); // Bottom left
-    context.lineTo(this.x + this.width, this.y + this.height); // Bottom right
+    // Main body
+    context.moveTo(this.x + this.width / 2, this.y); // Nose
+    context.lineTo(this.x + this.width * 0.85, this.y + this.height * 0.3);
+    context.lineTo(this.x + this.width, this.y + this.height * 0.6); // Right wing
+    context.lineTo(this.x + this.width * 0.7, this.y + this.height * 0.7);
+    context.lineTo(this.x + this.width * 0.6, this.y + this.height);
+    context.lineTo(this.x + this.width * 0.4, this.y + this.height);
+    context.lineTo(this.x + this.width * 0.3, this.y + this.height * 0.7);
+    context.lineTo(this.x, this.y + this.height * 0.6); // Left wing
+    context.lineTo(this.x + this.width * 0.15, this.y + this.height * 0.3);
     context.closePath();
     context.fill();
 
-    // Draw cockpit
-    context.fillStyle = '#87CEEB'; // Light sky blue
+    // Cockpit
+    context.fillStyle = '#87CEEB';
     context.beginPath();
     context.arc(
       this.x + this.width / 2,
-      this.y + this.height * 0.4,
-      this.width * 0.15,
-      0,
-      Math.PI * 2
+      this.y + this.height * 0.35,
+      this.width * 0.12,
+      0, Math.PI * 2
     );
     context.fill();
 
     context.restore();
   }
+
+  // Static cached sprite image
+  private static cachedSpriteImage: HTMLImageElement | null = null;
 
   /**
    * Clean up and mark the player for removal

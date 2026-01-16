@@ -1,0 +1,35 @@
+{
+  "name": "thunder-fighter",
+  "version": "1.0.0",
+  "description": "雷霆战机 - A classic vertical scrolling shooter game built with TypeScript and HTML5 Canvas",
+  "type": "module",
+  "main": "dist/main.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "test:pbt": "jest --testPathPattern=properties",
+    "lint": "tsc --noEmit"
+  },
+  "keywords": [
+    "game",
+    "shooter",
+    "typescript",
+    "canvas",
+    "html5"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/jest": "^29.5.14",
+    "fast-check": "^4.0.0",
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^30.2.0",
+    "ts-jest": "^29.3.4",
+    "typescript": "^5.8.3",
+    "vite": "^6.3.5"
+  }
+}

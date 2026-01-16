@@ -405,89 +405,216 @@ export class EnemyAircraft implements Collidable, Movable {
   }
 
   /**
-   * Render basic enemy (simple red triangle)
+   * Render basic enemy - UFO style flying saucer
    */
   private renderBasic(context: CanvasRenderingContext2D): void {
+    const cx = this.x + this.width / 2;
+    const cy = this.y + this.height / 2;
+    
+    // UFO dome (top)
     context.fillStyle = '#FF6B6B';
     context.beginPath();
-    context.moveTo(this.x + this.width / 2, this.y + this.height); // Bottom center
-    context.lineTo(this.x, this.y); // Top left
-    context.lineTo(this.x + this.width, this.y); // Top right
-    context.closePath();
+    context.ellipse(cx, cy - this.height * 0.1, this.width * 0.25, this.height * 0.3, 0, Math.PI, 0);
     context.fill();
+    
+    // UFO body (saucer)
+    const gradient = context.createLinearGradient(this.x, cy, this.x + this.width, cy);
+    gradient.addColorStop(0, '#CC4444');
+    gradient.addColorStop(0.5, '#FF6B6B');
+    gradient.addColorStop(1, '#CC4444');
+    context.fillStyle = gradient;
+    context.beginPath();
+    context.ellipse(cx, cy + this.height * 0.1, this.width * 0.5, this.height * 0.2, 0, 0, Math.PI * 2);
+    context.fill();
+    
+    // Lights on bottom
+    context.fillStyle = '#FFFF00';
+    for (let i = 0; i < 3; i++) {
+      const lightX = cx + (i - 1) * this.width * 0.25;
+      context.beginPath();
+      context.arc(lightX, cy + this.height * 0.25, 2, 0, Math.PI * 2);
+      context.fill();
+    }
   }
 
   /**
-   * Render shooter enemy (orange diamond)
+   * Render shooter enemy - aggressive fighter craft
    */
   private renderShooter(context: CanvasRenderingContext2D): void {
-    context.fillStyle = '#FFA500';
+    // Main body - angular fighter shape
+    const gradient = context.createLinearGradient(this.x, this.y, this.x + this.width, this.y + this.height);
+    gradient.addColorStop(0, '#FF8C00');
+    gradient.addColorStop(0.5, '#FFA500');
+    gradient.addColorStop(1, '#FF6600');
+    
+    context.fillStyle = gradient;
     context.beginPath();
-    context.moveTo(this.x + this.width / 2, this.y); // Top
-    context.lineTo(this.x + this.width, this.y + this.height / 2); // Right
-    context.lineTo(this.x + this.width / 2, this.y + this.height); // Bottom
-    context.lineTo(this.x, this.y + this.height / 2); // Left
+    // Nose
+    context.moveTo(this.x + this.width / 2, this.y);
+    // Right side
+    context.lineTo(this.x + this.width * 0.7, this.y + this.height * 0.3);
+    context.lineTo(this.x + this.width, this.y + this.height * 0.5);
+    context.lineTo(this.x + this.width * 0.8, this.y + this.height * 0.7);
+    context.lineTo(this.x + this.width * 0.6, this.y + this.height);
+    // Left side
+    context.lineTo(this.x + this.width * 0.4, this.y + this.height);
+    context.lineTo(this.x + this.width * 0.2, this.y + this.height * 0.7);
+    context.lineTo(this.x, this.y + this.height * 0.5);
+    context.lineTo(this.x + this.width * 0.3, this.y + this.height * 0.3);
     context.closePath();
     context.fill();
 
-    // Draw cannon indicator
+    // Cockpit window
+    context.fillStyle = '#FFE4B5';
+    context.beginPath();
+    context.ellipse(this.x + this.width / 2, this.y + this.height * 0.35, this.width * 0.12, this.height * 0.15, 0, 0, Math.PI * 2);
+    context.fill();
+
+    // Cannon
+    context.fillStyle = '#8B0000';
+    context.fillRect(this.x + this.width / 2 - 3, this.y + this.height - 6, 6, 8);
+    
+    // Engine glow
     context.fillStyle = '#FF4500';
-    context.fillRect(
-      this.x + this.width / 2 - 3,
-      this.y + this.height - 5,
-      6,
-      8
-    );
+    context.beginPath();
+    context.arc(this.x + this.width * 0.35, this.y + this.height * 0.85, 3, 0, Math.PI * 2);
+    context.fill();
+    context.beginPath();
+    context.arc(this.x + this.width * 0.65, this.y + this.height * 0.85, 3, 0, Math.PI * 2);
+    context.fill();
   }
 
   /**
-   * Render zigzag enemy (purple hexagon-like shape)
+   * Render zigzag enemy - alien drone style
    */
   private renderZigzag(context: CanvasRenderingContext2D): void {
-    context.fillStyle = '#9B59B6';
+    const cx = this.x + this.width / 2;
+    const cy = this.y + this.height / 2;
+    
+    // Outer ring with gradient
+    const gradient = context.createRadialGradient(cx, cy, 0, cx, cy, this.width / 2);
+    gradient.addColorStop(0, '#E74C3C');
+    gradient.addColorStop(0.5, '#9B59B6');
+    gradient.addColorStop(1, '#6C3483');
+    
+    context.fillStyle = gradient;
     context.beginPath();
-    context.moveTo(this.x + this.width * 0.3, this.y);
-    context.lineTo(this.x + this.width * 0.7, this.y);
-    context.lineTo(this.x + this.width, this.y + this.height * 0.4);
-    context.lineTo(this.x + this.width * 0.8, this.y + this.height);
-    context.lineTo(this.x + this.width * 0.2, this.y + this.height);
-    context.lineTo(this.x, this.y + this.height * 0.4);
+    // Hexagonal shape
+    for (let i = 0; i < 6; i++) {
+      const angle = (i * Math.PI / 3) - Math.PI / 2;
+      const px = cx + Math.cos(angle) * this.width * 0.45;
+      const py = cy + Math.sin(angle) * this.height * 0.45;
+      if (i === 0) context.moveTo(px, py);
+      else context.lineTo(px, py);
+    }
     context.closePath();
     context.fill();
+    
+    // Inner core - glowing
+    const coreGradient = context.createRadialGradient(cx, cy, 0, cx, cy, this.width * 0.2);
+    coreGradient.addColorStop(0, '#FFFFFF');
+    coreGradient.addColorStop(0.5, '#E74C3C');
+    coreGradient.addColorStop(1, '#9B59B6');
+    context.fillStyle = coreGradient;
+    context.beginPath();
+    context.arc(cx, cy, this.width * 0.2, 0, Math.PI * 2);
+    context.fill();
+    
+    // Energy lines
+    context.strokeStyle = '#E74C3C';
+    context.lineWidth = 2;
+    for (let i = 0; i < 3; i++) {
+      const angle = (i * Math.PI * 2 / 3) + this.elapsedTime * 2;
+      context.beginPath();
+      context.moveTo(cx, cy);
+      context.lineTo(cx + Math.cos(angle) * this.width * 0.4, cy + Math.sin(angle) * this.height * 0.4);
+      context.stroke();
+    }
   }
 
   /**
-   * Render boss enemy (large red/black ship)
+   * Render boss enemy - large battleship
    */
   private renderBoss(context: CanvasRenderingContext2D): void {
-    // Main body
-    context.fillStyle = '#8B0000';
+    // Main body gradient
+    const bodyGradient = context.createLinearGradient(this.x, this.y, this.x + this.width, this.y + this.height);
+    bodyGradient.addColorStop(0, '#4A0000');
+    bodyGradient.addColorStop(0.3, '#8B0000');
+    bodyGradient.addColorStop(0.7, '#CC0000');
+    bodyGradient.addColorStop(1, '#4A0000');
+    
+    // Main hull
+    context.fillStyle = bodyGradient;
     context.beginPath();
-    context.moveTo(this.x + this.width / 2, this.y + this.height); // Bottom center
-    context.lineTo(this.x, this.y + this.height * 0.3); // Left wing
-    context.lineTo(this.x + this.width * 0.2, this.y); // Top left
-    context.lineTo(this.x + this.width * 0.8, this.y); // Top right
-    context.lineTo(this.x + this.width, this.y + this.height * 0.3); // Right wing
+    context.moveTo(this.x + this.width * 0.5, this.y + this.height);
+    context.lineTo(this.x + this.width * 0.1, this.y + this.height * 0.7);
+    context.lineTo(this.x, this.y + this.height * 0.4);
+    context.lineTo(this.x + this.width * 0.15, this.y + this.height * 0.15);
+    context.lineTo(this.x + this.width * 0.3, this.y);
+    context.lineTo(this.x + this.width * 0.7, this.y);
+    context.lineTo(this.x + this.width * 0.85, this.y + this.height * 0.15);
+    context.lineTo(this.x + this.width, this.y + this.height * 0.4);
+    context.lineTo(this.x + this.width * 0.9, this.y + this.height * 0.7);
+    context.closePath();
+    context.fill();
+    
+    // Wing details
+    context.fillStyle = '#660000';
+    // Left wing
+    context.beginPath();
+    context.moveTo(this.x, this.y + this.height * 0.4);
+    context.lineTo(this.x + this.width * 0.25, this.y + this.height * 0.5);
+    context.lineTo(this.x + this.width * 0.15, this.y + this.height * 0.7);
+    context.closePath();
+    context.fill();
+    // Right wing
+    context.beginPath();
+    context.moveTo(this.x + this.width, this.y + this.height * 0.4);
+    context.lineTo(this.x + this.width * 0.75, this.y + this.height * 0.5);
+    context.lineTo(this.x + this.width * 0.85, this.y + this.height * 0.7);
     context.closePath();
     context.fill();
 
-    // Cockpit
-    context.fillStyle = '#FF0000';
-    context.beginPath();
-    context.arc(
-      this.x + this.width / 2,
-      this.y + this.height * 0.4,
-      this.width * 0.15,
-      0,
-      Math.PI * 2
+    // Bridge/cockpit
+    const cockpitGradient = context.createRadialGradient(
+      this.x + this.width / 2, this.y + this.height * 0.35, 0,
+      this.x + this.width / 2, this.y + this.height * 0.35, this.width * 0.15
     );
+    cockpitGradient.addColorStop(0, '#FF6666');
+    cockpitGradient.addColorStop(0.7, '#CC0000');
+    cockpitGradient.addColorStop(1, '#990000');
+    context.fillStyle = cockpitGradient;
+    context.beginPath();
+    context.ellipse(this.x + this.width / 2, this.y + this.height * 0.35, this.width * 0.15, this.height * 0.12, 0, 0, Math.PI * 2);
+    context.fill();
+
+    // Cannons
+    context.fillStyle = '#333333';
+    const cannonPositions = [0.25, 0.5, 0.75];
+    for (const pos of cannonPositions) {
+      context.fillRect(this.x + this.width * pos - 4, this.y + this.height - 8, 8, 12);
+      // Cannon glow
+      context.fillStyle = '#FF4500';
+      context.beginPath();
+      context.arc(this.x + this.width * pos, this.y + this.height + 2, 3, 0, Math.PI * 2);
+      context.fill();
+      context.fillStyle = '#333333';
+    }
+    
+    // Engine exhausts
+    context.fillStyle = '#FF6600';
+    context.beginPath();
+    context.ellipse(this.x + this.width * 0.35, this.y + this.height * 0.85, 6, 4, 0, 0, Math.PI * 2);
+    context.fill();
+    context.beginPath();
+    context.ellipse(this.x + this.width * 0.65, this.y + this.height * 0.85, 6, 4, 0, 0, Math.PI * 2);
     context.fill();
 
     // Health bar
     const healthBarWidth = this.width * 0.8;
-    const healthBarHeight = 6;
+    const healthBarHeight = 8;
     const healthBarX = this.x + (this.width - healthBarWidth) / 2;
-    const healthBarY = this.y - 15;
+    const healthBarY = this.y - 18;
 
     // Background
     context.fillStyle = '#333';
@@ -495,8 +622,21 @@ export class EnemyAircraft implements Collidable, Movable {
 
     // Health
     const healthPercent = this.health / this.maxHealth;
-    context.fillStyle = healthPercent > 0.3 ? '#00FF00' : '#FF0000';
+    const healthGradient = context.createLinearGradient(healthBarX, healthBarY, healthBarX + healthBarWidth, healthBarY);
+    if (healthPercent > 0.3) {
+      healthGradient.addColorStop(0, '#00FF00');
+      healthGradient.addColorStop(1, '#00CC00');
+    } else {
+      healthGradient.addColorStop(0, '#FF0000');
+      healthGradient.addColorStop(1, '#CC0000');
+    }
+    context.fillStyle = healthGradient;
     context.fillRect(healthBarX, healthBarY, healthBarWidth * healthPercent, healthBarHeight);
+    
+    // Border
+    context.strokeStyle = '#FFFFFF';
+    context.lineWidth = 1;
+    context.strokeRect(healthBarX, healthBarY, healthBarWidth, healthBarHeight);
   }
 
   /**

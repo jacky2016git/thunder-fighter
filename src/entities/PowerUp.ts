@@ -208,109 +208,162 @@ export class PowerUp implements Collidable, Movable {
   }
 
   /**
-   * Render weapon upgrade power-up (yellow star)
+   * Render weapon upgrade power-up (golden lightning bolt)
    */
   private renderWeaponUpgrade(context: CanvasRenderingContext2D): void {
     const cx = this.x + this.width / 2;
     const cy = this.y + this.height / 2;
-    const outerRadius = this.width / 2;
-    const innerRadius = this.width / 4;
-    const spikes = 5;
+    const size = this.width;
 
-    // Draw star
+    // Outer glow circle
+    const glowGradient = context.createRadialGradient(cx, cy, 0, cx, cy, size / 2);
+    glowGradient.addColorStop(0, 'rgba(255, 215, 0, 0.8)');
+    glowGradient.addColorStop(0.7, 'rgba(255, 165, 0, 0.4)');
+    glowGradient.addColorStop(1, 'rgba(255, 140, 0, 0)');
+    context.fillStyle = glowGradient;
+    context.beginPath();
+    context.arc(cx, cy, size / 2, 0, Math.PI * 2);
+    context.fill();
+
+    // Lightning bolt shape
     context.fillStyle = '#FFD700';
     context.beginPath();
-
-    for (let i = 0; i < spikes * 2; i++) {
-      const radius = i % 2 === 0 ? outerRadius : innerRadius;
-      const angle = (i * Math.PI) / spikes - Math.PI / 2;
-      const x = cx + Math.cos(angle) * radius;
-      const y = cy + Math.sin(angle) * radius;
-
-      if (i === 0) {
-        context.moveTo(x, y);
-      } else {
-        context.lineTo(x, y);
-      }
-    }
-
+    context.moveTo(cx + size * 0.1, this.y + size * 0.1);
+    context.lineTo(cx - size * 0.15, cy + size * 0.05);
+    context.lineTo(cx + size * 0.05, cy);
+    context.lineTo(cx - size * 0.1, this.y + this.height - size * 0.1);
+    context.lineTo(cx + size * 0.15, cy - size * 0.05);
+    context.lineTo(cx - size * 0.05, cy);
     context.closePath();
     context.fill();
 
-    // Add glow
-    context.shadowColor = '#FFD700';
-    context.shadowBlur = 10;
+    // Inner highlight
+    context.fillStyle = '#FFFFFF';
+    context.beginPath();
+    context.moveTo(cx + size * 0.05, this.y + size * 0.2);
+    context.lineTo(cx - size * 0.05, cy);
+    context.lineTo(cx + size * 0.02, cy - size * 0.05);
+    context.closePath();
     context.fill();
   }
 
   /**
-   * Render health power-up (green cross/plus)
+   * Render health power-up (red heart with cross)
    */
   private renderHealth(context: CanvasRenderingContext2D): void {
-    const crossWidth = this.width * 0.3;
-    const crossLength = this.height * 0.8;
+    const cx = this.x + this.width / 2;
+    const cy = this.y + this.height / 2;
+    const size = this.width;
 
-    context.fillStyle = '#00FF00';
+    // Outer glow
+    const glowGradient = context.createRadialGradient(cx, cy, 0, cx, cy, size / 2);
+    glowGradient.addColorStop(0, 'rgba(0, 255, 0, 0.6)');
+    glowGradient.addColorStop(0.7, 'rgba(0, 200, 0, 0.3)');
+    glowGradient.addColorStop(1, 'rgba(0, 150, 0, 0)');
+    context.fillStyle = glowGradient;
+    context.beginPath();
+    context.arc(cx, cy, size / 2, 0, Math.PI * 2);
+    context.fill();
 
-    // Vertical bar
-    context.fillRect(
-      this.x + (this.width - crossWidth) / 2,
-      this.y + (this.height - crossLength) / 2,
-      crossWidth,
-      crossLength
+    // Heart shape
+    const heartGradient = context.createRadialGradient(cx, cy - size * 0.1, 0, cx, cy, size * 0.4);
+    heartGradient.addColorStop(0, '#FF6B6B');
+    heartGradient.addColorStop(0.5, '#FF0000');
+    heartGradient.addColorStop(1, '#CC0000');
+    context.fillStyle = heartGradient;
+    
+    context.beginPath();
+    const topY = this.y + size * 0.25;
+    // Left curve
+    context.moveTo(cx, this.y + this.height - size * 0.15);
+    context.bezierCurveTo(
+      this.x + size * 0.1, cy,
+      this.x + size * 0.1, topY,
+      cx - size * 0.15, topY
     );
-
-    // Horizontal bar
-    context.fillRect(
-      this.x + (this.width - crossLength) / 2,
-      this.y + (this.height - crossWidth) / 2,
-      crossLength,
-      crossWidth
+    context.bezierCurveTo(
+      this.x + size * 0.15, topY - size * 0.1,
+      cx - size * 0.05, topY - size * 0.05,
+      cx, topY + size * 0.1
     );
-
-    // Add glow
-    context.shadowColor = '#00FF00';
-    context.shadowBlur = 10;
-    context.fillRect(
-      this.x + (this.width - crossWidth) / 2,
-      this.y + (this.height - crossLength) / 2,
-      crossWidth,
-      crossLength
+    // Right curve
+    context.bezierCurveTo(
+      cx + size * 0.05, topY - size * 0.05,
+      this.x + this.width - size * 0.15, topY - size * 0.1,
+      cx + size * 0.15, topY
     );
+    context.bezierCurveTo(
+      this.x + this.width - size * 0.1, topY,
+      this.x + this.width - size * 0.1, cy,
+      cx, this.y + this.height - size * 0.15
+    );
+    context.fill();
+
+    // White cross on heart
+    context.fillStyle = '#FFFFFF';
+    const crossSize = size * 0.25;
+    context.fillRect(cx - crossSize * 0.15, cy - crossSize * 0.4, crossSize * 0.3, crossSize * 0.8);
+    context.fillRect(cx - crossSize * 0.4, cy - crossSize * 0.15, crossSize * 0.8, crossSize * 0.3);
   }
 
   /**
-   * Render shield power-up (blue circle with shield icon)
+   * Render shield power-up (blue energy shield)
    */
   private renderShield(context: CanvasRenderingContext2D): void {
     const cx = this.x + this.width / 2;
     const cy = this.y + this.height / 2;
-    const radius = this.width / 2;
+    const size = this.width;
 
-    // Draw outer circle
-    context.fillStyle = '#4169E1';
+    // Outer energy glow
+    const glowGradient = context.createRadialGradient(cx, cy, 0, cx, cy, size / 2);
+    glowGradient.addColorStop(0, 'rgba(65, 105, 225, 0.8)');
+    glowGradient.addColorStop(0.6, 'rgba(30, 144, 255, 0.4)');
+    glowGradient.addColorStop(1, 'rgba(0, 191, 255, 0)');
+    context.fillStyle = glowGradient;
     context.beginPath();
-    context.arc(cx, cy, radius, 0, Math.PI * 2);
+    context.arc(cx, cy, size / 2, 0, Math.PI * 2);
     context.fill();
 
-    // Draw shield shape inside
-    context.fillStyle = '#87CEEB';
+    // Shield body
+    const shieldGradient = context.createLinearGradient(this.x, this.y, this.x + size, this.y + size);
+    shieldGradient.addColorStop(0, '#87CEEB');
+    shieldGradient.addColorStop(0.3, '#4169E1');
+    shieldGradient.addColorStop(0.7, '#1E90FF');
+    shieldGradient.addColorStop(1, '#0000CD');
+    
+    context.fillStyle = shieldGradient;
     context.beginPath();
-    context.moveTo(cx, cy - radius * 0.6);
-    context.lineTo(cx + radius * 0.5, cy - radius * 0.3);
-    context.lineTo(cx + radius * 0.5, cy + radius * 0.2);
-    context.lineTo(cx, cy + radius * 0.6);
-    context.lineTo(cx - radius * 0.5, cy + radius * 0.2);
-    context.lineTo(cx - radius * 0.5, cy - radius * 0.3);
+    // Shield shape - pointed bottom
+    context.moveTo(cx, this.y + size * 0.1);
+    context.lineTo(this.x + size * 0.85, this.y + size * 0.2);
+    context.lineTo(this.x + size * 0.85, cy + size * 0.1);
+    context.lineTo(cx, this.y + size * 0.9);
+    context.lineTo(this.x + size * 0.15, cy + size * 0.1);
+    context.lineTo(this.x + size * 0.15, this.y + size * 0.2);
     context.closePath();
     context.fill();
 
-    // Add glow
-    context.shadowColor = '#4169E1';
-    context.shadowBlur = 10;
+    // Shield border
+    context.strokeStyle = '#FFFFFF';
+    context.lineWidth = 2;
+    context.stroke();
+
+    // Inner highlight
+    context.fillStyle = 'rgba(255, 255, 255, 0.3)';
     context.beginPath();
-    context.arc(cx, cy, radius, 0, Math.PI * 2);
+    context.moveTo(cx - size * 0.15, this.y + size * 0.2);
+    context.lineTo(this.x + size * 0.25, this.y + size * 0.25);
+    context.lineTo(this.x + size * 0.25, cy);
+    context.lineTo(cx - size * 0.1, cy + size * 0.15);
+    context.closePath();
     context.fill();
+
+    // Energy symbol in center
+    context.strokeStyle = '#FFFFFF';
+    context.lineWidth = 2;
+    context.beginPath();
+    context.arc(cx, cy, size * 0.12, 0, Math.PI * 2);
+    context.stroke();
   }
 
   /**

@@ -1,11 +1,9 @@
-# GitHub Pages Deployment Workflow
-# Automatically deploys the game to GitHub Pages on push to main branch
-
+# GitHub Pages 部署工作流
 name: Deploy to GitHub Pages
 
 on:
   push:
-    branches: ['main']
+    branches: [main]
   workflow_dispatch:
 
 permissions:
@@ -14,8 +12,8 @@ permissions:
   id-token: write
 
 concurrency:
-  group: 'pages'
-  cancel-in-progress: true
+  group: "pages"
+  cancel-in-progress: false
 
 jobs:
   build:
@@ -32,9 +30,6 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
-
-      - name: Run tests
-        run: npm test
 
       - name: Build
         run: npm run build

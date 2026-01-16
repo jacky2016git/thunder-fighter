@@ -84,7 +84,7 @@ export class SpriteManager {
    */
   private loadPlayerSVG(): Promise<void> {
     return new Promise((resolve) => {
-      const svgData = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="200" height="200"><path d="M241.493333 136.533333l246.272 283.221334-233.941333-18.901334L179.925333 136.533333H241.493333zM241.493333 887.637333l246.272-283.221333-233.941333 18.901333-73.898667 264.32H241.493333zM526.890667 425.898667l71.68 6.144-65.152-61.568h-45.653334l39.125334 55.424zM526.890667 598.272l71.68-6.186667-65.152 61.568h-45.653334l39.125334-55.381333zM296.96 561.322667l-18.517333-24.618667h-172.373334l-24.618666 18.474667v43.093333l215.466666-36.949333zM296.96 462.805333l-24.661333 24.661334-166.229334 6.144-24.618666-21.888v-39.68l215.466666 30.762666z" fill="#1F5596"/><path d="M721.749333 468.992c9.813333 0 233.941333 18.474667 233.941334 43.093333s-209.322667 43.093333-233.941334 43.093334l-73.898666 24.618666-541.781334 30.762667 227.84-36.906667-43.093333-49.28-178.56-6.144v-12.330666l178.517333-6.144 43.093334-49.237334-227.797334-36.949333 541.781334 30.805333 73.898666 24.618667z m0 24.618667l36.906667 6.144 36.949333 12.330666-36.949333 12.288-36.949333 6.186667v-36.949333z m-24.661333 36.949333v-36.949333h-91.946667c-19.626667 4.522667-19.626667 32.426667 0 36.949333h91.946667z" fill="#1F5596"/><path d="M69.12 388.949333l135.466667 6.144-104.661334-110.805333-43.093333 24.618667 12.330667 80.042666zM69.12 635.221333l135.466667-6.186666-104.661334 110.848-43.093333-24.661334 12.330667-80z" fill="#1F5596"/></svg>`;
+      const svgData = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="200" height="200"><path d="M453.12 948.032h131.264c6.4 0 12.48 0.576 18.688 1.344V157.952c0-51.072-38.656-92.416-86.336-92.416-47.744 0-86.464 41.344-86.464 92.416v792c7.552-1.216 15.104-1.92 22.848-1.92z" fill="#C4E4EF"/><path d="M603.072 313.6l324.8 346.176v78.592L603.072 570.624zM603.072 788.16l87.104 90.752v92.864l-87.104-25.984zM430.336 782.4l-87.04 90.752v92.736l87.04-25.92zM430.336 312.32l-324.8 346.048v78.72l324.8-167.808zM502.144 949.44h30.144c1.408 0 2.944 0.128 4.288 0.384v-189.376c0-12.16-8.896-22.08-19.84-22.08s-19.904 9.856-19.904 22.08v189.504a28.8 28.8 0 0 1 5.312-0.512z" fill="#6AA4CA"/></svg>`;
       
       const img = new Image();
       const blob = new Blob([svgData], { type: 'image/svg+xml' });
@@ -152,36 +152,44 @@ export class SpriteManager {
 
   /**
    * Generate player aircraft sprite
-   * 生成玩家飞机精灵 - 使用自定义SVG
+   * 生成玩家飞机精灵 - 使用自定义SVG火箭造型
    */
   private generatePlayerSprite(): void {
-    const width = 64;
-    const height = 48;
+    const width = 48;
+    const height = 64;
     const canvas = this.createCanvas(width, height);
     const ctx = canvas.getContext('2d')!;
 
     if (this.playerSpriteImage) {
-      // Use the loaded SVG image - rotate 90 degrees to face up
-      ctx.save();
-      ctx.translate(width / 2, height / 2);
-      ctx.rotate(-Math.PI / 2); // Rotate -90 degrees so it faces up
-      // Draw centered, scaled to fit
-      const scale = Math.min(height / this.playerSpriteImage.width, width / this.playerSpriteImage.height) * 0.9;
-      const drawWidth = this.playerSpriteImage.width * scale;
-      const drawHeight = this.playerSpriteImage.height * scale;
-      ctx.drawImage(this.playerSpriteImage, -drawWidth / 2, -drawHeight / 2, drawWidth, drawHeight);
-      ctx.restore();
+      // Use the loaded SVG image directly (already facing up)
+      ctx.drawImage(this.playerSpriteImage, 0, 0, width, height);
     } else {
-      // Fallback: draw a simple triangle if SVG failed to load
-      const bodyGradient = ctx.createLinearGradient(0, 0, width, height);
-      bodyGradient.addColorStop(0, '#1F5596');
-      bodyGradient.addColorStop(1, '#0d2d4d');
-
-      ctx.fillStyle = bodyGradient;
+      // Fallback: draw a rocket shape if SVG failed to load
+      // Main body
+      ctx.fillStyle = '#C4E4EF';
       ctx.beginPath();
       ctx.moveTo(width / 2, 0);
-      ctx.lineTo(width, height);
-      ctx.lineTo(0, height);
+      ctx.lineTo(width * 0.65, height * 0.15);
+      ctx.lineTo(width * 0.65, height * 0.9);
+      ctx.lineTo(width * 0.35, height * 0.9);
+      ctx.lineTo(width * 0.35, height * 0.15);
+      ctx.closePath();
+      ctx.fill();
+
+      // Wings
+      ctx.fillStyle = '#6AA4CA';
+      ctx.beginPath();
+      ctx.moveTo(width * 0.35, height * 0.3);
+      ctx.lineTo(0, height * 0.7);
+      ctx.lineTo(0, height * 0.8);
+      ctx.lineTo(width * 0.35, height * 0.55);
+      ctx.closePath();
+      ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(width * 0.65, height * 0.3);
+      ctx.lineTo(width, height * 0.7);
+      ctx.lineTo(width, height * 0.8);
+      ctx.lineTo(width * 0.65, height * 0.55);
       ctx.closePath();
       ctx.fill();
     }

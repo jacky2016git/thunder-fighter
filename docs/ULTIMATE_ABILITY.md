@@ -72,7 +72,10 @@ Located in the bottom-right corner of the screen, the ultimate ability indicator
 
 ## Controls Summary
 - **Movement**: WASD or Arrow Keys
-- **Fire**: Space or Mouse Click
+- **Fire**: Automatic (or press Space/Mouse Click for manual control)
 - **Ultimate**: B Key
 - **Pause**: P Key
 - **Menu**: Escape Key
+
+## Auto-Fire Feature
+The game now features automatic shooting! Your aircraft will continuously fire bullets without needing to hold down any keys. This allows you to focus on movement and dodging enemy attacks. You can still manually press Space or click the mouse if you prefer manual control.

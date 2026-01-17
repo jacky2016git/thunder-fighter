@@ -19,7 +19,8 @@ When you start the game, you'll see the main menu with the following options:
 | ↓ / S | Move Down (向下移动) |
 | ← / A | Move Left (向左移动) |
 | → / D | Move Right (向右移动) |
-| SPACE | Fire (射击) |
+| SPACE | Fire (射击) - Optional, auto-fire enabled |
+| B | Ultimate Ability (大招) - Clear screen & invincibility |
 | P | Pause Game (暂停游戏) |
 | ESC | Pause / Return to Menu (暂停/返回菜单) |
 | ENTER | Confirm Selection (确认选择) |
@@ -28,8 +29,10 @@ When you start the game, you'll see the main menu with the following options:
 
 | Action | Effect |
 |--------|--------|
-| Left Click | Fire (射击) |
+| Left Click | Fire (射击) - Optional, auto-fire enabled |
 | Click on Menu | Select Option (选择选项) |
+
+**Note**: The game features automatic shooting! Your aircraft fires continuously without needing to hold any keys. You can still manually press SPACE or click if you prefer.
 
 ## 🛩️ Your Aircraft (你的战机)
 
@@ -42,8 +45,9 @@ When you start the game, you'll see the main menu with the following options:
 ### Abilities (能力)
 
 1. **Movement (移动)**: Full 8-directional movement within the game area
-2. **Shooting (射击)**: Automatic fire when holding the fire button
-3. **Invincibility (无敌)**: Brief invincibility after taking damage (2 seconds)
+2. **Auto-Fire (自动射击)**: Continuous automatic firing - no need to hold buttons!
+3. **Ultimate Ability (大招)**: Press B to clear all enemies and bullets, gain 30s invincibility
+4. **Invincibility (无敌)**: Brief invincibility after taking damage (2 seconds)
 
 ### Weapon Levels (武器等级)
 

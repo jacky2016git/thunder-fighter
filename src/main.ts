@@ -40,7 +40,7 @@ import { PlayerAircraft } from './entities/PlayerAircraft';
 import { EnemyAircraft } from './entities/EnemyAircraft';
 import { Bullet } from './entities/Bullet';
 import { PowerUp } from './entities/PowerUp';
-import { GameStateType, SoundEffect, EnemyType } from './types/enums';
+import { GameStateType, SoundEffect, EnemyType, BulletOwner } from './types/enums';
 import { DEFAULT_GAME_CONFIG, GameConfig } from './types/GameConfig';
 
 /**
@@ -602,6 +602,16 @@ class ThunderFighterGame {
             } else {
               this.spawnSystem.recordEnemyDestroyed(this.entityManager);
             }
+          }
+        }
+        
+        // Destroy all enemy bullets on screen
+        const bullets = this.entityManager.getEntitiesByType(Bullet);
+        for (const bullet of bullets) {
+          if (bullet.active && bullet.owner === BulletOwner.ENEMY) {
+            // Create small impact effect for destroyed bullets
+            this.visualEffects.createImpactSparks(bullet.x, bullet.y, 3);
+            bullet.active = false;
           }
         }
         

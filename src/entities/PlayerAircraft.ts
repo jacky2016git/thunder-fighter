@@ -57,6 +57,9 @@ export class PlayerAircraft implements Collidable, Movable {
   private autoPilotChangeTime: number;
   private autoPilotChangeInterval: number;
 
+  // God mode (invincibility)
+  godMode: boolean;
+
   // Canvas bounds for boundary constraints
   private canvasWidth: number;
   private canvasHeight: number;
@@ -106,6 +109,9 @@ export class PlayerAircraft implements Collidable, Movable {
     this.autoPilotDirection = { x: 0, y: 0 };
     this.autoPilotChangeTime = 0;
     this.autoPilotChangeInterval = 1000; // Change direction every 1 second
+
+    // God mode initialization (永远不死模式)
+    this.godMode = true; // Enabled by default for auto-play
 
     // Canvas bounds
     this.canvasWidth = config.canvas.width;
@@ -263,6 +269,9 @@ export class PlayerAircraft implements Collidable, Movable {
    * @param damage Amount of damage to apply
    */
   takeDamage(damage: number): void {
+    // God mode: never take damage
+    if (this.godMode) return;
+    
     if (this.invincible || !this.active) return;
 
     this.health -= damage;
@@ -608,6 +617,7 @@ export class PlayerAircraft implements Collidable, Movable {
     this.autoPilot = true; // Reset to auto-pilot enabled
     this.autoPilotDirection = { x: 0, y: 0 };
     this.autoPilotChangeTime = 0;
+    this.godMode = true; // Reset to god mode enabled
     this.active = true;
     this.collisionBox.x = this.x;
     this.collisionBox.y = this.y;

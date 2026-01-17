@@ -572,6 +572,55 @@ class ThunderFighterGame {
         this.audioManager.playSound(SoundEffect.PLAYER_SHOOT);
       }
     }
+
+    // Ultimate ability (B key)
+    if (this.inputManager.isActionActive('ultimate')) {
+      const activated = this.player.activateUltimate(this.gameTime);
+      if (activated) {
+        // Destroy all enemies on screen
+        const enemies = this.entityManager.getEntitiesByType(EnemyAircraft);
+        for (const enemy of enemies) {
+          if (enemy.active) {
+            // Add score for destroyed enemy
+            this.scoreSystem.addScore(enemy.scoreValue, this.gameTime);
+            this.scoreSystem.recordEnemyDestroyed();
+            
+            // Create explosion
+            const explosionSize = enemy.type === EnemyType.BOSS ? 2 : 1;
+            this.visualEffects.createExplosion(
+              enemy.x + enemy.width / 2,
+              enemy.y + enemy.height / 2,
+              explosionSize
+            );
+            
+            // Deactivate enemy
+            enemy.active = false;
+            
+            // Record for boss tracking
+            if (enemy.type === EnemyType.BOSS) {
+              this.spawnSystem.onBossDefeated();
+            } else {
+              this.spawnSystem.recordEnemyDestroyed(this.entityManager);
+            }
+          }
+        }
+        
+        // Create ultimate activation visual effect
+        this.visualEffects.createUltimateActivationEffect(
+          this.player.x + this.player.width / 2,
+          this.player.y + this.player.height / 2
+        );
+        
+        // Play explosion sound for dramatic effect
+        this.audioManager.playSound(SoundEffect.EXPLOSION);
+        
+        // Add screen flash
+        this.visualEffects.addScreenFlash(0.3, '#00ffff');
+        
+        // Clear the 'ultimate' action to prevent repeated activation
+        this.inputManager.getInputState().keys.delete('KeyB');
+      }
+    }
   }
 
   /**
@@ -652,13 +701,29 @@ class ThunderFighterGame {
     // Render visual effects
     this.visualEffects.render(context);
     
-    // Render HUD
+    // Render HUD with ultimate ability status
     const scoreData = this.scoreSystem.getScoreData();
     const health = this.player?.health ?? 0;
     const maxHealth = this.player?.maxHealth ?? this.config.player.maxHealth;
     const weaponLevel = this.player?.weaponLevel ?? 1;
     
-    this.uiRenderer.renderGameHUD(context, scoreData, health, maxHealth, weaponLevel);
+    // Get ultimate ability status
+    const ultimateReady = this.player?.isUltimateReady(this.gameTime) ?? false;
+    const ultimateActive = this.player?.ultimateActive ?? false;
+    const ultimateTimeRemaining = this.player?.ultimateTime ?? 0;
+    const ultimateCooldownRemaining = this.player?.getUltimateCooldown(this.gameTime) ?? 0;
+    
+    this.uiRenderer.renderGameHUD(
+      context,
+      scoreData,
+      health,
+      maxHealth,
+      weaponLevel,
+      ultimateReady,
+      ultimateActive,
+      ultimateTimeRemaining,
+      ultimateCooldownRemaining
+    );
   }
 
   /**

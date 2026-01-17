@@ -41,6 +41,13 @@ export class PlayerAircraft implements Collidable, Movable {
   invincibleTime: number;
   invincibleDuration: number;
 
+  // Ultimate ability properties
+  ultimateActive: boolean;
+  ultimateTime: number;
+  ultimateDuration: number;
+  ultimateCooldown: number;
+  lastUltimateTime: number;
+
   // Canvas bounds for boundary constraints
   private canvasWidth: number;
   private canvasHeight: number;
@@ -75,6 +82,13 @@ export class PlayerAircraft implements Collidable, Movable {
     this.invincibleTime = 0;
     this.invincibleDuration = config.player.invincibleDuration;
 
+    // Ultimate ability initialization
+    this.ultimateActive = false;
+    this.ultimateTime = 0;
+    this.ultimateDuration = 30000; // 30 seconds in milliseconds
+    this.ultimateCooldown = 60000; // 60 seconds cooldown
+    this.lastUltimateTime = -this.ultimateCooldown; // Allow immediate use
+
     // Canvas bounds
     this.canvasWidth = config.canvas.width;
     this.canvasHeight = config.canvas.height;
@@ -90,8 +104,18 @@ export class PlayerAircraft implements Collidable, Movable {
     // Move based on velocity
     this.move(deltaTime);
 
-    // Update invincibility timer
-    if (this.invincible) {
+    // Update ultimate ability timer
+    if (this.ultimateActive) {
+      this.ultimateTime -= deltaTime * 1000; // Convert to milliseconds
+      if (this.ultimateTime <= 0) {
+        this.ultimateActive = false;
+        this.ultimateTime = 0;
+        this.invincible = false; // Remove invincibility when ultimate ends
+      }
+    }
+
+    // Update invincibility timer (only if not from ultimate)
+    if (this.invincible && !this.ultimateActive) {
       this.invincibleTime -= deltaTime * 1000; // Convert to milliseconds
       if (this.invincibleTime <= 0) {
         this.invincible = false;
@@ -263,6 +287,46 @@ export class PlayerAircraft implements Collidable, Movable {
   }
 
   /**
+   * Activate ultimate ability (大招)
+   * Destroys all enemies on screen and makes player invincible for 30 seconds
+   * @param currentTime Current game time in milliseconds
+   * @returns true if ultimate was activated, false if on cooldown
+   */
+  activateUltimate(currentTime: number): boolean {
+    // Check if ultimate is on cooldown
+    if (currentTime - this.lastUltimateTime < this.ultimateCooldown) {
+      return false;
+    }
+
+    // Activate ultimate
+    this.ultimateActive = true;
+    this.ultimateTime = this.ultimateDuration;
+    this.invincible = true;
+    this.lastUltimateTime = currentTime;
+
+    return true;
+  }
+
+  /**
+   * Check if ultimate ability is ready
+   * @param currentTime Current game time in milliseconds
+   * @returns true if ultimate is ready to use
+   */
+  isUltimateReady(currentTime: number): boolean {
+    return currentTime - this.lastUltimateTime >= this.ultimateCooldown;
+  }
+
+  /**
+   * Get ultimate cooldown remaining time
+   * @param currentTime Current game time in milliseconds
+   * @returns Remaining cooldown time in milliseconds, 0 if ready
+   */
+  getUltimateCooldown(currentTime: number): number {
+    const remaining = this.ultimateCooldown - (currentTime - this.lastUltimateTime);
+    return Math.max(0, remaining);
+  }
+
+  /**
    * Handle collision with another object
    * @param other The other collidable object
    */
@@ -407,6 +471,9 @@ export class PlayerAircraft implements Collidable, Movable {
     this.invincible = false;
     this.invincibleTime = 0;
     this.lastFireTime = 0;
+    this.ultimateActive = false;
+    this.ultimateTime = 0;
+    this.lastUltimateTime = -this.ultimateCooldown; // Allow immediate use
     this.active = true;
     this.collisionBox.x = this.x;
     this.collisionBox.y = this.y;

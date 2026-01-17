@@ -201,7 +201,11 @@ export class UIRenderer {
     scoreData: ScoreData,
     health: number,
     maxHealth: number,
-    weaponLevel: number
+    weaponLevel: number,
+    ultimateReady: boolean = false,
+    ultimateActive: boolean = false,
+    ultimateTimeRemaining: number = 0,
+    ultimateCooldownRemaining: number = 0
   ): void {
     const { width } = this.config.canvas;
 
@@ -228,6 +232,17 @@ export class UIRenderer {
 
     // Weapon level indicator
     this.drawWeaponLevel(ctx, weaponLevel, width - 130, 35);
+
+    // Ultimate ability indicator (bottom right)
+    this.drawUltimateIndicator(
+      ctx,
+      width - 130,
+      this.config.canvas.height - 80,
+      ultimateReady,
+      ultimateActive,
+      ultimateTimeRemaining,
+      ultimateCooldownRemaining
+    );
 
     // Bottom bar with stats
     const bottomBarGradient = ctx.createLinearGradient(0, this.config.canvas.height - 40, 0, this.config.canvas.height);
@@ -343,6 +358,150 @@ export class UIRenderer {
       ctx.fill();
     }
     ctx.shadowBlur = 0;
+  }
+
+  /**
+   * Draw ultimate ability indicator
+   * 绘制大招指示器
+   */
+  private drawUltimateIndicator(
+    ctx: CanvasRenderingContext2D,
+    x: number,
+    y: number,
+    ready: boolean,
+    active: boolean,
+    timeRemaining: number,
+    cooldownRemaining: number
+  ): void {
+    const size = 50;
+    const centerX = x + size / 2;
+    const centerY = y + size / 2;
+
+    ctx.save();
+
+    // Background circle
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, size / 2, 0, Math.PI * 2);
+    ctx.fill();
+
+    if (active) {
+      // Active state - pulsing cyan glow
+      const pulse = Math.sin(this.time * 8) * 0.3 + 0.7;
+      ctx.shadowColor = '#00ffff';
+      ctx.shadowBlur = 15 * pulse;
+      ctx.strokeStyle = '#00ffff';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, size / 2 - 2, 0, Math.PI * 2);
+      ctx.stroke();
+
+      // Draw time remaining arc
+      const progress = timeRemaining / 30000; // 30 seconds
+      ctx.strokeStyle = '#00ffff';
+      ctx.lineWidth = 4;
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, size / 2 - 6, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * progress);
+      ctx.stroke();
+
+      // Active icon (star burst)
+      ctx.fillStyle = '#ffffff';
+      for (let i = 0; i < 8; i++) {
+        const angle = (i / 8) * Math.PI * 2 + this.time * 2;
+        const innerRadius = 8;
+        const outerRadius = 15;
+        const x1 = centerX + Math.cos(angle) * innerRadius;
+        const y1 = centerY + Math.sin(angle) * innerRadius;
+        const x2 = centerX + Math.cos(angle) * outerRadius;
+        const y2 = centerY + Math.sin(angle) * outerRadius;
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.lineWidth = 2;
+        ctx.stroke();
+      }
+
+      // Time text
+      ctx.shadowBlur = 0;
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 10px "Segoe UI", Arial, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(`${Math.ceil(timeRemaining / 1000)}s`, centerX, centerY + size / 2 + 12);
+    } else if (ready) {
+      // Ready state - glowing gold
+      const pulse = Math.sin(this.time * 4) * 0.2 + 0.8;
+      ctx.shadowColor = this.colors.accent;
+      ctx.shadowBlur = 12 * pulse;
+      ctx.strokeStyle = this.colors.accent;
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, size / 2 - 2, 0, Math.PI * 2);
+      ctx.stroke();
+
+      // Ready icon (lightning bolt)
+      ctx.fillStyle = this.colors.accent;
+      ctx.beginPath();
+      ctx.moveTo(centerX + 2, centerY - 12);
+      ctx.lineTo(centerX - 6, centerY);
+      ctx.lineTo(centerX, centerY + 2);
+      ctx.lineTo(centerX - 2, centerY + 12);
+      ctx.lineTo(centerX + 6, centerY);
+      ctx.lineTo(centerX, centerY - 2);
+      ctx.closePath();
+      ctx.fill();
+
+      // "READY" text
+      ctx.shadowBlur = 0;
+      ctx.fillStyle = this.colors.accent;
+      ctx.font = 'bold 10px "Segoe UI", Arial, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('READY', centerX, centerY + size / 2 + 12);
+    } else {
+      // Cooldown state - gray with progress arc
+      ctx.strokeStyle = 'rgba(100, 100, 100, 0.5)';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, size / 2 - 2, 0, Math.PI * 2);
+      ctx.stroke();
+
+      // Cooldown progress arc
+      const progress = 1 - (cooldownRemaining / 60000); // 60 seconds cooldown
+      ctx.strokeStyle = 'rgba(0, 212, 255, 0.5)';
+      ctx.lineWidth = 4;
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, size / 2 - 6, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * progress);
+      ctx.stroke();
+
+      // Cooldown icon (dimmed lightning)
+      ctx.fillStyle = 'rgba(100, 100, 100, 0.5)';
+      ctx.beginPath();
+      ctx.moveTo(centerX + 2, centerY - 12);
+      ctx.lineTo(centerX - 6, centerY);
+      ctx.lineTo(centerX, centerY + 2);
+      ctx.lineTo(centerX - 2, centerY + 12);
+      ctx.lineTo(centerX + 6, centerY);
+      ctx.lineTo(centerX, centerY - 2);
+      ctx.closePath();
+      ctx.fill();
+
+      // Cooldown time text
+      ctx.fillStyle = this.colors.textMuted;
+      ctx.font = 'bold 10px "Segoe UI", Arial, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(`${Math.ceil(cooldownRemaining / 1000)}s`, centerX, centerY + size / 2 + 12);
+    }
+
+    // Label
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = this.colors.textMuted;
+    ctx.font = this.smallFont;
+    ctx.textAlign = 'left';
+    ctx.fillText('[B] 大招', x + size + 8, centerY);
+
+    ctx.restore();
   }
 
   /**

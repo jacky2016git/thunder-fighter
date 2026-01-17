@@ -25,7 +25,8 @@ const DEFAULT_KEY_BINDINGS: Record<string, string> = {
   'Space': 'fire',
   'KeyP': 'pause',
   'Escape': 'menu',
-  'Enter': 'confirm'
+  'Enter': 'confirm',
+  'KeyB': 'ultimate'
 };
 
 export class InputManager {

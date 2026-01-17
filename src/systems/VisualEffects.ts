@@ -269,6 +269,59 @@ export class VisualEffects {
   }
 
   /**
+   * Create ultimate ability activation effect
+   * 创建大招激活效果
+   */
+  createUltimateActivationEffect(x: number, y: number): void {
+    // Create expanding shockwave rings
+    for (let ring = 0; ring < 3; ring++) {
+      const delay = ring * 0.1;
+      setTimeout(() => {
+        // Create ring of particles
+        for (let i = 0; i < 24; i++) {
+          const angle = (i / 24) * Math.PI * 2;
+          const speed = 300 + Math.random() * 100;
+
+          this.particles.push({
+            x: x,
+            y: y,
+            vx: Math.cos(angle) * speed,
+            vy: Math.sin(angle) * speed,
+            life: 0.8 + Math.random() * 0.4,
+            maxLife: 1.2,
+            size: 6 + Math.random() * 4,
+            color: ring % 2 === 0 ? '#00ffff' : '#ffffff',
+            alpha: 1,
+            type: ParticleType.STAR
+          });
+        }
+      }, delay * 1000);
+    }
+
+    // Create central burst
+    for (let i = 0; i < 50; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const speed = 150 + Math.random() * 200;
+
+      this.particles.push({
+        x: x,
+        y: y,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed,
+        life: 0.6 + Math.random() * 0.4,
+        maxLife: 1,
+        size: 5 + Math.random() * 5,
+        color: Math.random() > 0.5 ? '#00ffff' : '#ffffff',
+        alpha: 1,
+        type: ParticleType.FIRE
+      });
+    }
+
+    // Add screen shake
+    this.addScreenShake(0.4, 8);
+  }
+
+  /**
    * Create damage flash effect for player
    * 创建玩家受伤闪烁效果
    */

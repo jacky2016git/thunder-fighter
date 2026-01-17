@@ -12,14 +12,16 @@ The ultimate ability is a powerful special attack that can be activated by press
 
 ### When Activated:
 1. **Destroys All Enemies**: All enemies currently on screen are instantly destroyed
-2. **Score Bonus**: You receive points for all destroyed enemies
-3. **Invincibility**: Player becomes invincible for 30 seconds
-4. **Visual Effects**:
+2. **Clears Enemy Bullets**: All enemy bullets on screen are removed (with spark effects)
+3. **Score Bonus**: You receive points for all destroyed enemies
+4. **Invincibility**: Player becomes invincible for 30 seconds
+5. **Visual Effects**:
    - Massive particle burst from player position
    - Multiple expanding shockwave rings
    - Screen flash (cyan color)
    - Screen shake effect
    - Explosions at each enemy position
+   - Sparks at each destroyed bullet position
 
 ### UI Indicator
 Located in the bottom-right corner of the screen, the ultimate ability indicator shows:

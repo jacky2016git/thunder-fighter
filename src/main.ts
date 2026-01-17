@@ -561,8 +561,8 @@ class ThunderFighterGame {
     
     this.player.setVelocity(vx, vy);
     
-    // Shooting
-    if (this.inputManager.isActionActive('fire')) {
+    // Shooting (auto-fire or manual)
+    if (this.player.autoFire || this.inputManager.isActionActive('fire')) {
       const bullets = this.player.fire(this.gameTime);
       if (bullets.length > 0) {
         for (const bullet of bullets) {

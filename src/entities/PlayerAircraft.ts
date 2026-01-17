@@ -48,6 +48,9 @@ export class PlayerAircraft implements Collidable, Movable {
   ultimateCooldown: number;
   lastUltimateTime: number;
 
+  // Auto-fire property
+  autoFire: boolean;
+
   // Canvas bounds for boundary constraints
   private canvasWidth: number;
   private canvasHeight: number;
@@ -88,6 +91,9 @@ export class PlayerAircraft implements Collidable, Movable {
     this.ultimateDuration = 30000; // 30 seconds in milliseconds
     this.ultimateCooldown = 60000; // 60 seconds cooldown
     this.lastUltimateTime = -this.ultimateCooldown; // Allow immediate use
+
+    // Auto-fire initialization (enabled by default)
+    this.autoFire = true;
 
     // Canvas bounds
     this.canvasWidth = config.canvas.width;
@@ -474,6 +480,7 @@ export class PlayerAircraft implements Collidable, Movable {
     this.ultimateActive = false;
     this.ultimateTime = 0;
     this.lastUltimateTime = -this.ultimateCooldown; // Allow immediate use
+    this.autoFire = true; // Reset to auto-fire enabled
     this.active = true;
     this.collisionBox.x = this.x;
     this.collisionBox.y = this.y;

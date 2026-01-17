@@ -535,31 +535,39 @@ class ThunderFighterGame {
   private handlePlayerInput(_deltaTime: number): void {
     if (!this.player || !this.player.active) return;
     
-    let vx = 0;
-    let vy = 0;
-    
-    // Movement
-    if (this.inputManager.isActionActive('moveUp')) {
-      vy = -this.player.speed;
+    // Auto-pilot mode
+    if (this.player.autoPilot) {
+      const enemies = this.entityManager.getEntitiesByType(EnemyAircraft);
+      const bullets = this.entityManager.getEntitiesByType(Bullet);
+      this.player.updateAutoPilot(this.gameTime, enemies, bullets);
+    } else {
+      // Manual control
+      let vx = 0;
+      let vy = 0;
+      
+      // Movement
+      if (this.inputManager.isActionActive('moveUp')) {
+        vy = -this.player.speed;
+      }
+      if (this.inputManager.isActionActive('moveDown')) {
+        vy = this.player.speed;
+      }
+      if (this.inputManager.isActionActive('moveLeft')) {
+        vx = -this.player.speed;
+      }
+      if (this.inputManager.isActionActive('moveRight')) {
+        vx = this.player.speed;
+      }
+      
+      // Normalize diagonal movement
+      if (vx !== 0 && vy !== 0) {
+        const factor = 1 / Math.sqrt(2);
+        vx *= factor;
+        vy *= factor;
+      }
+      
+      this.player.setVelocity(vx, vy);
     }
-    if (this.inputManager.isActionActive('moveDown')) {
-      vy = this.player.speed;
-    }
-    if (this.inputManager.isActionActive('moveLeft')) {
-      vx = -this.player.speed;
-    }
-    if (this.inputManager.isActionActive('moveRight')) {
-      vx = this.player.speed;
-    }
-    
-    // Normalize diagonal movement
-    if (vx !== 0 && vy !== 0) {
-      const factor = 1 / Math.sqrt(2);
-      vx *= factor;
-      vy *= factor;
-    }
-    
-    this.player.setVelocity(vx, vy);
     
     // Shooting (auto-fire or manual)
     if (this.player.autoFire || this.inputManager.isActionActive('fire')) {

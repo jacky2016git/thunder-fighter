@@ -51,6 +51,12 @@ export class PlayerAircraft implements Collidable, Movable {
   // Auto-fire property
   autoFire: boolean;
 
+  // Auto-pilot properties
+  autoPilot: boolean;
+  private autoPilotDirection: { x: number; y: number };
+  private autoPilotChangeTime: number;
+  private autoPilotChangeInterval: number;
+
   // Canvas bounds for boundary constraints
   private canvasWidth: number;
   private canvasHeight: number;
@@ -94,6 +100,12 @@ export class PlayerAircraft implements Collidable, Movable {
 
     // Auto-fire initialization (enabled by default)
     this.autoFire = true;
+
+    // Auto-pilot initialization
+    this.autoPilot = true; // Enabled by default
+    this.autoPilotDirection = { x: 0, y: 0 };
+    this.autoPilotChangeTime = 0;
+    this.autoPilotChangeInterval = 1000; // Change direction every 1 second
 
     // Canvas bounds
     this.canvasWidth = config.canvas.width;
@@ -333,6 +345,118 @@ export class PlayerAircraft implements Collidable, Movable {
   }
 
   /**
+   * Update auto-pilot movement
+   * AI logic to automatically move and avoid threats
+   * @param currentTime Current game time in milliseconds
+   * @param enemies Array of enemy aircraft
+   * @param bullets Array of enemy bullets
+   */
+  updateAutoPilot(currentTime: number, enemies: any[], bullets: any[]): void {
+    if (!this.autoPilot) return;
+
+    // Change direction periodically or when near boundaries
+    if (currentTime - this.autoPilotChangeTime > this.autoPilotChangeInterval || this.isNearBoundary()) {
+      this.autoPilotChangeTime = currentTime;
+      this.calculateAutoPilotDirection(enemies, bullets);
+    }
+
+    // Apply auto-pilot velocity
+    const factor = 1 / Math.sqrt(2); // Normalize diagonal movement
+    if (this.autoPilotDirection.x !== 0 && this.autoPilotDirection.y !== 0) {
+      this.velocityX = this.autoPilotDirection.x * this.speed * factor;
+      this.velocityY = this.autoPilotDirection.y * this.speed * factor;
+    } else {
+      this.velocityX = this.autoPilotDirection.x * this.speed;
+      this.velocityY = this.autoPilotDirection.y * this.speed;
+    }
+  }
+
+  /**
+   * Calculate auto-pilot movement direction based on threats
+   * @param enemies Array of enemy aircraft
+   * @param bullets Array of enemy bullets
+   */
+  private calculateAutoPilotDirection(enemies: any[], bullets: any[]): void {
+    const dangerZone = 150; // Distance to consider as dangerous
+    const centerX = this.x + this.width / 2;
+    const centerY = this.y + this.height / 2;
+
+    // Find nearest threats
+    let nearestThreatX = 0;
+    let nearestThreatY = 0;
+    let minDistance = Infinity;
+
+    // Check enemies
+    for (const enemy of enemies) {
+      if (!enemy.active) continue;
+      const dx = (enemy.x + enemy.width / 2) - centerX;
+      const dy = (enemy.y + enemy.height / 2) - centerY;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+      
+      if (distance < dangerZone && distance < minDistance) {
+        minDistance = distance;
+        nearestThreatX = dx;
+        nearestThreatY = dy;
+      }
+    }
+
+    // Check bullets
+    for (const bullet of bullets) {
+      if (!bullet.active || bullet.owner === 'player') continue;
+      const dx = bullet.x - centerX;
+      const dy = bullet.y - centerY;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+      
+      if (distance < dangerZone && distance < minDistance) {
+        minDistance = distance;
+        nearestThreatX = dx;
+        nearestThreatY = dy;
+      }
+    }
+
+    // Decide movement direction
+    if (minDistance < Infinity) {
+      // Move away from threat
+      this.autoPilotDirection.x = nearestThreatX < 0 ? 1 : -1;
+      this.autoPilotDirection.y = nearestThreatY < 0 ? 1 : -1;
+    } else {
+      // Random movement pattern when no immediate threat
+      const patterns = [
+        { x: 1, y: 0 },   // Right
+        { x: -1, y: 0 },  // Left
+        { x: 0, y: -1 },  // Up
+        { x: 0, y: 1 },   // Down
+        { x: 1, y: -1 },  // Up-Right
+        { x: -1, y: -1 }, // Up-Left
+        { x: 1, y: 1 },   // Down-Right
+        { x: -1, y: 1 },  // Down-Left
+        { x: 0, y: 0 }    // Stay
+      ];
+      
+      const pattern = patterns[Math.floor(Math.random() * patterns.length)];
+      this.autoPilotDirection.x = pattern.x;
+      this.autoPilotDirection.y = pattern.y;
+    }
+
+    // Avoid boundaries
+    if (this.x < 50) this.autoPilotDirection.x = 1;
+    if (this.x > this.canvasWidth - this.width - 50) this.autoPilotDirection.x = -1;
+    if (this.y < 50) this.autoPilotDirection.y = 1;
+    if (this.y > this.canvasHeight - this.height - 50) this.autoPilotDirection.y = -1;
+  }
+
+  /**
+   * Check if player is near canvas boundaries
+   */
+  private isNearBoundary(): boolean {
+    const margin = 30;
+    return this.x < margin || 
+           this.x > this.canvasWidth - this.width - margin ||
+           this.y < margin || 
+           this.y > this.canvasHeight - this.height - margin;
+  }
+
+  /**
    * Handle collision with another object
    * @param other The other collidable object
    */
@@ -481,6 +605,9 @@ export class PlayerAircraft implements Collidable, Movable {
     this.ultimateTime = 0;
     this.lastUltimateTime = -this.ultimateCooldown; // Allow immediate use
     this.autoFire = true; // Reset to auto-fire enabled
+    this.autoPilot = true; // Reset to auto-pilot enabled
+    this.autoPilotDirection = { x: 0, y: 0 };
+    this.autoPilotChangeTime = 0;
     this.active = true;
     this.collisionBox.x = this.x;
     this.collisionBox.y = this.y;
